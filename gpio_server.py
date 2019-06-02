@@ -2,7 +2,6 @@
 # REST API for access to selected GPIO pins
 #
 # Written by Glen Darling, February 2019.
-# Copyright 2019, Glen Darling; all rights reserved.
 #
 
 from flask import Flask

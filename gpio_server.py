@@ -95,7 +95,7 @@ def gpio_set(pin, state):
       return ('{"pin": %d, "state": true}\n' % pin)
 
 
-# Main program (to instantiate and start the 3 threads)
+# Main program (to start the web server thread)
 if __name__ == '__main__':
   webapp.run(host=REST_API_BIND_ADDRESS, port=REST_API_PORT)
 

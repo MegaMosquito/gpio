@@ -14,5 +14,5 @@ RUN pip install Flask
 COPY ./gpio_server.py .
 
 # Run the daemon
-CMD python3 gpio_server.py
+CMD python gpio_server.py
 

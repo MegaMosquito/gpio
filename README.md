@@ -1,18 +1,35 @@
 # gpio
 
-This container exposes Raspberry Pi GPIO pins through a REST API on port 6667. Before you can use a pin, you must first "configure" the pin for "in"-put or "out"-put. If configuring the pin for input, you may optionally configure a pull-"up" or pull-"down" resistor (and if none is specified a pullup resistor is configured). The pin numbering is *board* numbering. That is, you cannot use the Broadcom chip GPIO number, but instead you must use the sequential pin numbers as they appear on the board connector. That is, the numbers shown in the circles within the connector image on the diagram on this page:
+This container exposes Raspberry Pi GPIO pins through a REST API on port 6667.
+
+Before you can do anything else with this service, you must use the "mode" API to tell it whether you wish to use Broadcom pin numbering (i.e., the numbering of the pins on the Broadcom SOC) or "board" pin numbering (i.e., the sequential pin numbers as they appear on the board connector). The board pin numbers are shown in the circles within the connector image on the diagram on this page, while the Boradcom pin numbers are shown on either side of the connector image, with "GPIO" prefixes:
 
  *  https://www.raspberrypi.org/documentation/usage/gpio/
-    
-You could modify a single line in the source to change to using the Broadcom chip pin numbers if you prefer (this is documented near the top of the source file), here:
 
- *  https://github.com/MegaMosquito/gpio/blob/master/gpio_server.py#L22
+After you have set the mode, you must use the "configure" API to configure the pins you wish to use (i.e., configure them for input or output use). If you are configuring for input, specify a pull-up or pull-down resistor (if none is specified a pullup resistor is automatically configured).
 
-After configuring the pin appropriately, you can use either the "get" or "set" APIs. Note that these are digital GPIO pins so they will either be "true" or "false". The "set" API accepts those values, or it will accept "0" or "1" (representing "false" or "true", respectively).
+Once all of that preparation is complete, you can use either the "GET" or "POST" pin number APIs shown below. Note that GPIO pins are treated as purely digital so they will either show "true" or "false". The "POST" API accepts those literal values, but it will also accept "0" or "1" (representing "false" or "true", respectively).
+
+## Usage:
+
+```
+make build
+make run
+make test
+```
 
 ## API details in brief...
 
+### MODE:
+
+You must set the mode before doing anything else with this service.
+
+`POST "/gpio/v1/mode/<bcm-or-board>"`:
+ - where `<bcm-or-board>` is either "bcm" or "board".
+
 ### CONFIGURE:
+
+You must configure a GPIO pin for input or output before using its GET or POST.
 
 `POST "/gpio/v1/configure/<pin>/<inout>/<pull>"`, or
 `POST "/gpio/v1/configure/<pin>/<inout>"`:
@@ -22,15 +39,17 @@ After configuring the pin appropriately, you can use either the "get" or "set" A
 
 ### GET:
 
-`GET "/gpio/v1/get/<pin>"`:
+Get the current value of a GPIO pin that was previously configured for input.
+
+`GET "/gpio/v1/<pin>"`:
  - where `<pin>` is a board pin number, in {1 .. 40}.
 
-### SET:
+### POST:
 
-`POST "/gpio/v1/set/<pin>/<state>"`:
+Set the value of a GPIO pin that was previously configured for output.
+
+`POST "/gpio/v1/<pin>/<state>"`:
  - where `<pin>` is a board pin number, in {1 .. 40},
  - and `<state>` is either "false" (or "0") or "true" (or "1").
-
-
 
 

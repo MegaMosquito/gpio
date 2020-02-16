@@ -19,28 +19,63 @@ REST_API_PORT = 6667
 webapp = Flask('gpio')
 
 # Setup the GPIO module
-GPIO.setmode(GPIO.BOARD) # or GPIO.BCM (Note: must change valid_pin() to match!)
 GPIO.setwarnings(True)
+
+# A global to indicate the mode
+mode = None
+
+# Non-GPIO "board" pins
+non_gpio = [1, 2, 4, 6, 9, 14, 17, 20, 25, 30, 34, 39]
+
 
 # Validate the pin number string (using BOARD numbering)
 def valid_pin(pinstr):
+  global mode
+  pin_min = 1
+  pin_max = 40
+  if "bcm" == mode:
+    max = 26
   try:
     pin = int(pinstr)
-    if pin < 0 or pin > 40:
+    if pin < pin_min or pin > pin_max:
       return False
     return True
   except:
     return False
 
+
 # The web server code
+
+
+# MODE: <board|bcm>
+@webapp.route("/gpio/v1/mode/<bcmorboard>", methods=['POST'])
+def gpio_mode(bcmorboard):
+  global mode
+  bcmorboard = bcmorboard.lower()
+  if None != mode:
+    return ('{"error": "Mode is already set to %s."}' % mode)
+  elif "bcm" == bcmorboard:
+    GPIO.setmode(GPIO.BCM)
+    mode = "bcm"
+    return ('{"mode": "bcm"}\n')
+  elif "board" == bcmorboard:
+    GPIO.setmode(GPIO.BOARD)
+    mode = "board"
+    return ('{"mode": "board"}\n')
+  else:
+    return ('{"error": "Unrecognized mode, %s."}' % bcmorboard)
 
 
 # CONFIGURE: <number>/<in|out>/<up|down>
 @webapp.route("/gpio/v1/configure/<pin>/<inout>", methods=['POST'])
 @webapp.route("/gpio/v1/configure/<pin>/<inout>/<pull>", methods=['POST'])
 def gpio_config(pin, inout, pull=None):
-  if not valid_pin(pin):
+  if None == mode:
+    return ('{"error": "Mode is not set."}\n')
+  elif not valid_pin(pin):
     return ('{"error": "Unrecognized pin number: %s."}\n' % pin)
+  elif "board" == mode and pin in non_gpio:
+    return ('{"error": "Board pin number %s is not a GPIO pin."}\n' % pin)
   elif "in" != inout and "out" != inout:
     return ('{"error": "Unrecognized direction: %s"}\n' % inout)
   elif None != pull and not ("up" == pull or "down" == pull):
@@ -65,9 +100,11 @@ def gpio_config(pin, inout, pull=None):
 
 
 # GET: <number>
-@webapp.route("/gpio/v1/get/<pin>", methods=['GET'])
+@webapp.route("/gpio/v1/<pin>", methods=['GET'])
 def gpio_get(pin):
-  if not valid_pin(pin):
+  if None == mode:
+    return ('{"error": "Mode is not set."}\n')
+  elif not valid_pin(pin):
     return ('{"error": "Unrecognized pin number: %s."}\n' % pin)
   else:
     pin = int(pin)
@@ -78,10 +115,12 @@ def gpio_get(pin):
     return ('{"error": "Undefined value returned for pin %d."}\n' % pin)
 
 
-# SET: <number>/<0|1> or <number>/<true|false>
-@webapp.route("/gpio/v1/set/<pin>/<state>", methods=['POST'])
-def gpio_set(pin, state):
-  if not valid_pin(pin):
+# POST: <number>/<0|1> or <number>/<true|false>
+@webapp.route("/gpio/v1/<pin>/<state>", methods=['POST'])
+def gpio_post(pin, state):
+  if None == mode:
+    return ('{"error": "Mode is not set."}\n')
+  elif not valid_pin(pin):
     return ('{"error": "Unrecognized pin number: %s."}\n' % pin)
   elif "0" != state and "1" != state and "false" != state and "true" != state:
     return ('{"error": "Unrecognized state value: %s}\n' % state)

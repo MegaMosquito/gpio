@@ -29,7 +29,7 @@ GPIO26 (37) (38) GPIO20
 
 For example, as you can see above, Broadcom GPIO #2 is located at board pin #3. 
 
-Board pns may be numbered from 1 through 40, but many of those numbers are not valid GPIOs (e.g., board pin #1 is "3V3", a power pin, not a GPIO). Broadcom GPIO numbers range from 1 through 26 and all are valid GPIOs. When you use board numbering, the "configure" and GET/POST pin APIs check to see if you are passing a valid GPIO pin number and return an error if you are not.
+Board pins may be numbered from 1 through 40, but many of those numbers are not valid GPIOs (e.g., board pin #1 is "3V3", a power pin, not a GPIO). Broadcom GPIO numbers range from 1 through 26 and all are valid GPIOs. When you use board numbering, the "configure" and GET/POST pin APIs check to see if you are passing a valid GPIO pin number and return an error if you are not.
 
 After you have set the mode, you must use the "configure" API to configure the pins you wish to use (i.e., configure them for input or output use). If you are configuring for input, specify a pull-up or pull-down resistor (if none is specified a pullup resistor is automatically configured).
 

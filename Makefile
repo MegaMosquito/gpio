@@ -15,7 +15,12 @@ test:
 	curl -X POST -sS localhost:6667/gpio/v1/mode/bcm
 	curl -X POST -sS localhost:6667/gpio/v1/configure/14/out
 	curl -X POST -sS localhost:6667/gpio/v1/configure/15/out
+	curl -X POST -sS localhost:6667/gpio/v1/14/1
+	sleep 1
+	curl -X POST -sS localhost:6667/gpio/v1/15/1
+	sleep 1
 	curl -X POST -sS localhost:6667/gpio/v1/14/0
+	sleep 1
 	curl -X POST -sS localhost:6667/gpio/v1/15/0
 
 exec:

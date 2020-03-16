@@ -34,7 +34,7 @@ def valid_pin(pinstr):
   pin_min = 1
   pin_max = 40
   if "bcm" == mode:
-    max = 26
+    pin_max = 26
   try:
     pin = int(pinstr)
     if pin < pin_min or pin > pin_max:

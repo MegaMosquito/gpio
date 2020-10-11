@@ -8,7 +8,7 @@ dev: build stop
 	docker run -it --privileged --name gpio_server -p 6667:6667 --volume `pwd`:/outside ibmosquito/gpio_server:1.0.0 /bin/sh
 
 run: stop
-	-docker rm -f speedtest 2>/dev/null || :
+	-docker rm -f gpio_server 2>/dev/null || :
 	docker run -d --privileged --name gpio_server -p 6667:6667 ibmosquito/gpio_server:1.0.0
 
 test:
